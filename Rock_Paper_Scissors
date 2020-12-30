@@ -1,0 +1,59 @@
+import random
+import sys
+strategies = ['rock', 'paper', 'scissors']
+lose = {'rock':'paper','paper':'scissors', 'scissors':'rock'}
+print('Enter your name: ', end='')
+name = input()
+print(f'Hello, {name}')
+rating = open('rating.txt','r')
+lines = rating.readlines()
+ok=0
+scores={}
+def convert_to_dict():
+    for line in lines:
+        lines[lines.index(line)] = line.replace('\n','')
+    global scores
+    global ok
+    if ok == 0:
+        for line in lines:
+            scores[line.split()[0]] = int(line.split()[1])
+            ok = 1
+    return scores
+def check_player():
+    if name in convert_to_dict():
+        return convert_to_dict()[name]
+    else:
+        convert_to_dict()[name] = 0
+        return convert_to_dict()[name]
+
+
+while True:
+    user = input()
+    convert_to_dict()
+    check_player()
+    def exit():
+        if user == '!exit':
+            print('Bye')
+            sys.exit()
+        elif user == '!rating':
+            print(check_player())
+        elif user not in strategies:
+            print('Invalid input')
+            sys.exit()
+
+    exit()
+    computer = random.choice(strategies)
+
+    def wins_over():
+        if user == computer:
+            print(f'There is a draw {user}')
+            scores[name] +=50
+
+        elif user in strategies:
+            if lose[user]==computer:
+                print(f'Sorry, but the computer chose {computer}')
+            else:
+                print(f'Well done. The computer chose {computer} and failed')
+                scores[name] += 100
+    wins_over()
+
