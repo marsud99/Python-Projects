@@ -1,0 +1,93 @@
+import random
+import sys
+strategies = []
+new_strategies = []
+def strats():
+    global strategies
+    strategies = list(input().split(','))
+def new():
+    global new_strategies
+    new_strategies = strategies[strategies.index(user)+1:] + strategies[:strategies.index(user)]
+win = []
+lose = []
+def win_or_lose():
+    global win
+    global lose
+    x = int(len(new_strategies)/2)
+    win = new_strategies[x:]
+    lose = new_strategies[:x]
+
+
+
+#lose = {'rock':'paper','paper':'scissors', 'scissors':'rock'}
+print('Enter your name: ', end='')
+name = input()
+print(f'Hello, {name}')
+rating = open('rating.txt','r')
+lines = rating.readlines()
+ok=0
+scores={}
+def convert_to_dict():
+    for line in lines:
+        lines[lines.index(line)] = line.replace('\n','')
+    global scores
+    global ok
+    if ok == 0:
+        for line in lines:
+            scores[line.split()[0]] = int(line.split()[1])
+            ok = 1
+    return scores
+def check_player():
+    if name in convert_to_dict():
+        return convert_to_dict()[name]
+    else:
+        convert_to_dict()[name] = 0
+        return convert_to_dict()[name]
+def exit():
+        if user == '!exit':
+            print('Bye')
+            sys.exit()
+        elif user == '!rating':
+            print(check_player())
+        elif user not in strategies:
+            print('Invalid input')
+            sys.exit()
+def wins_over():
+        if user == computer:
+            print(f'There is a draw {user}')
+            scores[name] +=50
+
+        elif user in strategies:
+            if computer in lose:
+                print(f'Sorry, but the computer chose {computer}')
+            elif computer in win:
+                print(f'Well done. The computer chose {computer} and failed')
+                scores[name] += 100
+
+strats()
+while True:
+    print('Okay, let\'s start')
+    user = input()
+    if strategies ==['']:
+       strategies = ['rock','paper','scissors']
+    if user not in strategies and user  not in ['!exit','!rating']:
+        print('Invalid input')
+    elif user  not in ['!exit','!rating']:
+            new()
+            win_or_lose()
+            convert_to_dict()
+            check_player()
+            exit()
+            computer = random.choice(strategies)
+            wins_over()
+
+    else:
+            convert_to_dict()
+            check_player()
+            exit()
+            computer = random.choice(strategies)
+            wins_over()
+
+
+
+
