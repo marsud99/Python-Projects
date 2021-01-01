@@ -1,0 +1,132 @@
+#importing libraries
+import random
+import sys
+import os.path
+import sqlite3
+# if os.path.exists('card.s3db'):
+#     pass
+# else:
+conn = sqlite3.connect(('card.s3db'))
+cur = conn.cursor()
+def create_table():
+    cur.execute('''CREATE TABLE IF NOT EXISTS card (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    number TEXT,
+    pin TEXT,
+    balance INTEGER DEFAULT 0
+    );
+    ''')
+create_table()
+
+def import_in_db(els,balance):
+    cur.execute(f"INSERT INTO card VALUES (NULL,{els[len(els)-1][0]},{els[len(els)-1][1]},{balance})")
+    conn.commit()
+#settings random pattern
+random.seed(1)
+#class for Bank cards
+class BankCard():
+    CARD_NR = {}
+    ACC_BALANCE = {}
+    def __init__(self):
+        self.MII='4'
+        self.BIN='00000'
+        self.ACCOUNT_ID=str(random.randint(100000000,999999999))
+        self.CHECK='5'
+        self.PIN=str(random.randint(1000,9999))
+        self.BALANCE=0
+        self.CARD_NR[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK]= self.PIN
+        self.ACC_BALANCE[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK] = self.BALANCE
+
+
+card =''
+x = ''
+#luhn algorithm
+def luhn(code):
+    sum = 0
+    check_sum=int(code)%10
+    code_list=int(code)//10
+    code_list= list(str(code_list))
+    for i in range(0,len(code_list)):
+        code_list[i]=int(code_list[i])
+    for i in range(0,len(code_list),2):
+            code_list[i] *= 2
+    for i in range(0,len(code_list)):
+        if(code_list[i]>9):
+            code_list[i] -= 9
+    for i in code_list:
+        sum +=int(i)
+    if((sum + check_sum) % 10 ==0):
+        return code
+    else:
+        return 0
+
+#first options that appear
+def options1():
+    global card
+    print('1. Create an account')
+    print('2. Log into account')
+    print('0. Exit')
+    user_option = int(input())
+
+    if user_option == 1:
+        while True:
+            card = BankCard()
+            els = list(card.CARD_NR.items())
+            if(luhn(els[len(els)-1][0]) != els[len(els)-1][0]):
+                card.CARD_NR.popitem()
+            else:
+                balance = card.ACC_BALANCE[els[len(els)-1][0]]
+                import_in_db(els,balance)
+                break
+        print('Your card has been created')
+        print('Your card number:')
+        print(els[len(els)-1][0])
+        print('Your card PIN:')
+        print(els[len(els)-1][1])
+    elif user_option == 2:
+        login()
+    elif user_option == 0:
+        print('Bye!')
+        sys.exit()
+#after selecting log into account in options 1
+def login():
+    global x
+
+    print('Enter your card number:')
+    x = input()
+    if x in card.CARD_NR.keys():
+        print('Please enter your pin:')
+        y = input()
+        if card.CARD_NR[x] == y:
+            print("You have successfully logged in")
+            options2()
+        else:
+            print('Wrong card number or PIN')
+    else:
+        print('Wrong card number or PIN')
+#options after logging into account
+def options2():
+    print('''1. Balance
+2. Log out
+0. Exit''')
+    user_option = int(input())
+    if user_option == 1:
+        print(card.ACC_BALANCE[x])
+        options2()
+    elif user_option == 2:
+        print('You have successfully logged out!')
+        options1()
+    elif user_option == 0:
+        print('Bye!')
+        sys.exit()
+#infinite loop that ends only with sys.exit()
+while True:
+    global loggedin
+    options1()
+
+
+
+
+
+
+
