@@ -101,10 +101,3 @@ def options2():
 while True:
     global loggedin
     options1()
-
-
-
-
-
-
-
