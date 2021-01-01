@@ -1,0 +1,180 @@
+# importing libraries
+import random
+import sys
+import sqlite3
+
+conn = sqlite3.connect('card.s3db', timeout=10)
+
+cur = conn.cursor()
+cur.execute('''CREATE TABLE IF NOT EXISTS card (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    number TEXT,
+    pin TEXT,
+    balance INTEGER DEFAULT 0
+    );
+    ''')
+conn.commit()
+# settings random pattern
+
+
+class BankCard():
+    CARD_NR = {}
+    ACC_BALANCE = {}
+
+    def __init__(self):
+        self.MII = '4'
+        self.BIN = '00000'
+        self.ACCOUNT_ID = str(random.randint(100000000, 999999999))
+        self.CHECK = '5'
+        self.PIN = str(random.randint(1000, 9999))
+        self.BALANCE = 0
+        self.CARD_NR[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK] = self.PIN
+        self.ACC_BALANCE[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK] = self.BALANCE
+
+
+card = ''
+x = ''
+
+
+def luhn(code):
+    sum = 0
+    check_sum = int(code) % 10
+    code_list = int(code) // 10
+    code_list = list(str(code_list))
+    for i in range(0, len(code_list)):
+        code_list[i] = int(code_list[i])
+    for i in range(0, len(code_list), 2):
+        code_list[i] *= 2
+    for i in range(0, len(code_list)):
+        if (code_list[i] > 9):
+            code_list[i] -= 9
+    for i in code_list:
+        sum += int(i)
+    if ((sum + check_sum) % 10 == 0):
+        return code
+    else:
+        return 0
+
+
+def options2():
+    print('''1. Balance
+2. Add income
+3. Do transfer
+4. Close account
+5. Log out
+0. Exit''')
+    user_option = int(input())
+    if user_option == 1:
+        cur.execute(f'SELECT balance FROM card WHERE number = {x}')
+        show = cur.fetchone()
+        print('Balance:', show[0])
+        conn.commit()
+        options2()
+    elif user_option == 2:
+        print('Enter income:')
+        income = int(input())
+        cur.execute(f'UPDATE card SET balance = balance + {income} WHERE number = {x}')
+        conn.commit()
+        print('Income was added!')
+        options2()
+    elif user_option == 3:
+        print('Enter card number:')
+        card_for_transfer = input()
+        cur.execute(f'SELECT number,balance FROM card WHERE number = {card_for_transfer}')
+        i = cur.fetchone()
+        conn.commit()
+
+        if luhn(card_for_transfer) == 0:
+            print('Probably you made a mistake in the card number. Please try again!')
+            options2()
+        elif i is None:
+            print('Such a card does not exist.')
+            options2()
+
+        elif card_for_transfer == x:
+            print('You can\'t transfer money to the same account')
+            options2()
+        else:
+            print('Enter how much money you want to transfer:')
+            amount_transfer = int(input())
+            cur.execute(f'SELECT balance FROM card WHERE number = {x}')
+            z=cur.fetchone()
+            if (z[0] < amount_transfer):
+                print('Not enough money!')
+                options2()
+            else:
+                cur.execute(f'UPDATE card SET balance = balance - {amount_transfer} WHERE number = {x}')
+                conn.commit()
+                cur.execute(f'UPDATE card SET balance = balance + {amount_transfer} WHERE number = {card_for_transfer}')
+                conn.commit()
+                print('Success!')
+                options2()
+    elif user_option == 4:
+        cur.execute(f'DELETE FROM card WHERE number={x}')
+        conn.commit()
+        print('The account has been closed!')
+    elif user_option == 5:
+        print('You have successfully logged out!')
+        options1()
+    elif user_option == 0:
+        print('Bye!')
+        sys.exit()
+
+
+def login():
+    global x
+    global card
+    print('Enter your card number:')
+    x = input()
+    cur.execute(f'SELECT number,pin FROM card WHERE number = {x}')
+    i = cur.fetchone()
+    conn.commit()
+    if i is not None and x == i[0]:
+        print('Please enter your pin:')
+        y = input()
+        if i[1] == y:
+            print("You have successfully logged in")
+            options2()
+        else:
+            print('Wrong card number or PIN')
+    else:
+        print('Wrong card number or PIN')
+
+
+def options1():
+    global card
+    print('1. Create an account')
+    print('2. Log into account')
+    print('0. Exit')
+    user_option = int(input())
+    if user_option == 1:
+        while True:
+            card = BankCard()
+            els = list(card.CARD_NR.items())
+            if (luhn(els[len(els) - 1][0]) != els[len(els) - 1][0]):
+                card.CARD_NR.popitem()
+            else:
+                balance = 0
+                conn.commit()
+                cur.execute(f"INSERT INTO card VALUES (NULL,{els[len(els) - 1][0]},{els[len(els) - 1][1]},{balance})")
+                conn.commit()
+                break
+        print('Your card has been created')
+        print('Your card number:')
+        print(els[len(els) - 1][0])
+        print('Your card PIN:')
+        print(els[len(els) - 1][1])
+    elif user_option == 2:
+        login()
+    elif user_option == 0:
+        print('Bye!')
+        sys.exit()
+
+
+# infinite loop that ends only with sys.exit()
+while True:
+    global loggedin
+    conn.commit()
+    options1()
+
+conn.close()
