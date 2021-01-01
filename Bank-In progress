@@ -1,6 +1,9 @@
+#importing libraries
 import random
 import sys
+#settings random pattern
 random.seed(1)
+#class for Bank cards
 class BankCard():
     CARD_NR = {}
     ACC_BALANCE = {}
@@ -14,10 +17,10 @@ class BankCard():
         self.CARD_NR[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK]= self.PIN
         self.ACC_BALANCE[self.MII + self.BIN + self.ACCOUNT_ID + self.CHECK] = self.BALANCE
 
-    #def log(self,CARD_NR,PIN):
-        #if
+
 card =''
 x = ''
+#luhn algorithm
 def luhn(code):
     sum = 0
     check_sum=int(code)%10
@@ -37,7 +40,7 @@ def luhn(code):
     else:
         return 0
 
-
+#first options that appear
 def options1():
     global card
     print('1. Create an account')
@@ -63,6 +66,7 @@ def options1():
     elif user_option == 0:
         print('Bye!')
         sys.exit()
+#after selecting log into account in options 1
 def login():
     global x
 
@@ -78,7 +82,7 @@ def login():
             print('Wrong card number or PIN')
     else:
         print('Wrong card number or PIN')
-
+#options after logging into account
 def options2():
     print('''1. Balance
 2. Log out
@@ -93,7 +97,7 @@ def options2():
     elif user_option == 0:
         print('Bye!')
         sys.exit()
-
+#infinite loop that ends only with sys.exit()
 while True:
     global loggedin
     options1()
