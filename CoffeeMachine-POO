@@ -1,0 +1,75 @@
+import sys
+class Coffee():
+    def __init__(self,water,milk,beans,disp_cups, money):
+        self.water = water
+        self.milk = milk
+        self.beans = beans
+        self.disp_cups = disp_cups
+        self.money = money
+    def buy(self,remaining):
+        if self.water > remaining.water:
+            print('Sorry,not enough water')
+        elif self.milk > remaining.milk:
+            print('Sorry, not enough milk')
+        elif self.beans > remaining.beans:
+            print('Sorry, not enough beans')
+        elif self.disp_cups > remaining.disp_cups:
+            print('Sorry, not enough cups')
+        else:
+            remaining.water -= self.water
+            remaining.milk -= self.milk
+            remaining.beans -= self.beans
+            remaining.disp_cups -= self.disp_cups
+            remaining.money += self.money
+            print('I have enough resources, making you a coffee!')
+    def fill(self):
+            print('Write how many ml of water do you want to add:')
+            self.water += int(input())
+            print('Write how many ml of milk do you want to add:')
+            self.milk += int(input())
+            print('Write how many grams of coffee beans do you want to add:')
+            self.beans += int(input())
+            print('Write how many disposable cups of coffee do you want to add:')
+            self.disp_cups += int(input())
+    def take(self):
+        print(f'I gave you ${self.money}')
+        self.money = 0
+    def __str__(self):
+        return (f'''The coffee machine has:
+{self.water} of water
+{self.milk} of milk
+{self.beans} of coffee beans
+{self.disp_cups} of disposable cups
+${self.money} of money
+''')
+
+def action():
+    espresso = Coffee(250, 0, 16, 1, 4)
+    latte = Coffee(350, 75, 20, 1, 7)
+    cappuccino = Coffee(200, 100, 12, 1, 6)
+    remaining = Coffee(400, 540, 120, 9, 550)
+    while True:
+        print('Write action (buy, fill, take, remaining, exit)')
+        user = input()
+        if user == 'buy':
+            print('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino , back - to main menu:')
+            drink = input()
+            if drink== '1':
+                 Coffee.buy(espresso,remaining)
+            elif drink == '2':
+                 Coffee.buy(latte,remaining)
+            elif drink == '3':
+                 Coffee.buy(cappuccino,remaining)
+            elif drink == 'back':
+                action()
+        elif user == 'fill':
+             Coffee.fill(remaining)
+        elif user == 'take':
+             Coffee.take(remaining)
+        elif user == 'remaining':
+            print(remaining)
+        elif user == 'exit':
+            sys.exit()
+
+
+action()
