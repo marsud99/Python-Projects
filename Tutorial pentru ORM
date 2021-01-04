@@ -1,0 +1,39 @@
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Date
+from datetime import datetime
+from sqlalchemy.orm import sessionmaker
+#se creeaza baza de date
+engine = create_engine('sqlite:///file_name?check_same_thread=False')
+
+Base = declarative_base()
+
+#se creeaza clasa pentru a defini tableul din baza de date
+class Table(Base):
+    __tablename__ = 'table_name'
+    id = Column(Integer, primary_key=True)
+    string_field = Column(String, default='default_value')
+    date_field = Column(Date, default=datetime.today())
+
+    def __repr__(self):
+        return self.string_field
+#creeaza tabelul in baza de date        
+Base.metadata.create_all(engine)
+
+#se creeaza sesiunea pentru accesarea bazei de date
+Session = sessionmaker(bind=engine)
+session = Session()
+# se populeaza o linie din tabel
+new_row = Table(string_field='This is string field!',
+         date_field=datetime.strptime('01-24-2020', '%m-%d-%Y').date())
+session.add(new_row)
+session.commit()
+
+#se selecteaza toate inregistrarile tabelului si se initializeaza intr-o lista in variabila rows
+rows = session.query(Table).all()
+
+#primul element al listei rows
+first_row = rows[0] # In case rows list is not empty
+print(first_row.string_field) # Will print value of the string_field
+print(first_row.id) # Will print the id of the row.
+print(first_row) # Will print the string that was returned by __repr__ method
